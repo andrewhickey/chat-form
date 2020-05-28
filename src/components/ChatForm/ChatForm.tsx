@@ -1,5 +1,6 @@
 import React, { useState } from "react"
-import { ChatFormData } from "./types"
+import { ChatField } from "./types"
+import ChatQuestion from "./ChatQuestion"
 
 type ChatFormProps = {
   /** smallest possible delay in ms before the form replies */
@@ -7,23 +8,26 @@ type ChatFormProps = {
   /** longest possible delay in ms before the form replies */
   maxDelay?: number
   /**
-   * children is a function containing the current data that the user has provided
-   * this information can be used to customise the questions
-   * questions will be asked in the order that they are listed
-   * a question is any child with a name prop
    * */
-  children: ({ values: ChatFormData }) => React.ReactNode
+  fields: ({ values: ChatFormData }) => ChatField[]
 }
 
-function ChatForm({
-  minDelay = 100,
-  maxDelay = 300,
-  children: renderFunc,
-}: ChatFormProps) {
+function ChatForm({ minDelay = 100, maxDelay = 300, fields }: ChatFormProps) {
   const [values, setValues] = useState({})
-  const children = renderFunc({ values })
+  const [currentField, setCurrentField] = useState("")
+  const computedFields = fields({ values })
 
-  return <div className="flex flex-column">{children}</div>
+  const visibleIndex =
+    computedFields.findIndex(field => field.name === currentField) || 0
+  const visibleFields = computedFields.slice(0, visibleIndex + 1)
+
+  return (
+    <div className="flex flex-column">
+      {visibleFields.map(field => (
+        <ChatQuestion key={field.name}>{field.question}</ChatQuestion>
+      ))}
+    </div>
+  )
 }
 
 export default ChatForm
