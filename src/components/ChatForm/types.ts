@@ -1,13 +1,12 @@
 import React from "react"
 import { string as YupString, Schema } from "yup"
 
-export type FieldType = "text" | "select" | "boolean"
+export type FieldType = "text" | "select" | "boolean" | "number"
 
-export type ChatField = {
+export type FieldDefinition = {
   name: string
   question: React.ReactNode
   fieldType: FieldType
-  initialValue: any
   validationSchema: Schema<any>
 }
 
