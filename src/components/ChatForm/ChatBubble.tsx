@@ -7,7 +7,9 @@ type QuestionProps = {
 }
 function Question({ children, className }: QuestionProps) {
   return (
-    <div className={classNames("bg-gray-300 p-6 rounded max-w-3/4", className)}>
+    <div
+      className={classNames("bg-gray-300 p-6 rounded-lg max-w-3/4", className)}
+    >
       {children}
     </div>
   )
