@@ -27,6 +27,7 @@ function ChatForm({
   const [touched, setTouched] = useState({})
   const [currentField, setCurrentField] = useState("")
 
+  console.log(values)
   const computedFields = fields({ values })
 
   const visibleIndex = Math.max(
@@ -78,7 +79,11 @@ function ChatForm({
         <ChatField
           key={field.name}
           field={field}
-          value={values[field.name] || initialValues[field.name]}
+          value={
+            field.name in values
+              ? values[field.name]
+              : initialValues[field.name]
+          }
           error={errors[field.name]}
           touched={touched[field.name]}
           onChange={onChangeField(field.name)}

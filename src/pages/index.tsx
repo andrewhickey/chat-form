@@ -14,8 +14,16 @@ const IndexPage = () => (
         }}
         initialValues={{
           firstName: "",
+          age: 0,
+          significantOther: null,
         }}
         fields={({ values }) => [
+          {
+            name: "significantOther",
+            question: "Do you have a significant other?",
+            validationSchema: Yup.boolean(),
+            fieldType: "boolean",
+          },
           {
             name: "firstName",
             question: "What is your first name?",
@@ -25,6 +33,7 @@ const IndexPage = () => (
               .required("Please enter your name"),
             fieldType: "text",
           },
+
           {
             name: "age",
             question: "How old are you?",

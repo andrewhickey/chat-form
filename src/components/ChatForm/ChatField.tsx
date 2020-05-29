@@ -2,6 +2,7 @@ import * as React from "react"
 import ChatBubble from "./ChatBubble"
 import { FieldDefinition } from "./types"
 import BasicInput from "../BasicInput"
+import SelectButtonGroup from "../SelectButtonGroup"
 import classNames from "classnames"
 
 type ChatFieldProps = {
@@ -23,28 +24,11 @@ function ChatField({
   onFocus,
   onBlur,
 }: ChatFieldProps) {
-  const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
-    const value = e.currentTarget.value
-    onChange(value)
-  }
-
-  const handleFocus = () => {
-    onFocus()
-  }
-
-  const handleBlur = () => {
-    onBlur()
-  }
-
   const inputProps = {
     value: value,
-    onChange: handleChange,
-    onFocus: handleFocus,
-    onBlur: handleBlur,
-    className: classNames({
-      "border-red-600": touched && error,
-    }),
-    autoFocus: true,
+    onChange,
+    onFocus,
+    onBlur,
   }
 
   return (
@@ -52,11 +36,41 @@ function ChatField({
       <ChatBubble className="self-start">{field.question}</ChatBubble>
       <ChatBubble className="self-end">
         {field.fieldType === "text" && (
-          <BasicInput {...inputProps} type="text" />
+          <BasicInput
+            {...inputProps}
+            className={classNames({
+              "border-red-600": touched && error,
+            })}
+            autoFocus
+            type="text"
+          />
         )}
         {field.fieldType === "number" && (
-          <BasicInput {...inputProps} type="number" />
+          <BasicInput
+            {...inputProps}
+            className={classNames({
+              "border-red-600": touched && error,
+            })}
+            autoFocus
+            type="number"
+          />
         )}
+        {field.fieldType === "boolean" && (
+          <SelectButtonGroup
+            {...inputProps}
+            options={[
+              {
+                value: true,
+                label: "Yes",
+              },
+              {
+                value: false,
+                label: "No",
+              },
+            ]}
+          />
+        )}
+
         {touched && error ? (
           <span className="mt-3 text-red-600">{error}</span>
         ) : null}
