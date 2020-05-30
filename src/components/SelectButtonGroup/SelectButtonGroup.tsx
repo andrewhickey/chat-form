@@ -42,11 +42,7 @@ function SelectButtonGroup({
     <div className={className} onBlur={handleBlur} onFocus={handleFocus}>
       {options.map(option => {
         const isChecked = option.value === value
-        console.log("ISCHECKED", {
-          "option.value": option.value,
-          value,
-          isChecked,
-        })
+
         return (
           <label
             key={option.value}
@@ -72,14 +68,6 @@ function SelectButtonGroup({
       })}
     </div>
   )
-
-  // <input
-  //   {...inputProps}
-  //   className={classNames(
-  //     "max-w-full shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline",
-  //     className
-  //   )}
-  // />
 }
 
 export default SelectButtonGroup
