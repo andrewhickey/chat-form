@@ -17,10 +17,15 @@ const IndexPage = () => (
           firstName: "",
           age: 0,
           significantOther: null,
+          significantOtherName: "",
         }}
         validate={validateSchema(
           Yup.object({
             significantOther: Yup.boolean(),
+            significantOtherName: Yup.string()
+              .min(2, "Too short")
+              .max(25, "Too long")
+              .required("Please enter  significant other's name"),
             firstName: Yup.string()
               .min(2, "Too short")
               .max(25, "Too long")
@@ -37,6 +42,15 @@ const IndexPage = () => (
             question: "Do you have a significant other?",
             fieldType: "boolean",
           },
+          ...(values.significantOther
+            ? [
+                {
+                  name: "significantOtherName",
+                  question: "What is your significant other's name?",
+                  fieldType: "text",
+                },
+              ]
+            : []),
           {
             name: "firstName",
             question: "What is your first name?",
