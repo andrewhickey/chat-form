@@ -33,18 +33,20 @@ function SelectButtonGroup({
   ) => {
     const checked = e.currentTarget.checked
     if (checked) {
+      onFocus()
       onChange(value)
       onBlur()
     }
   }
 
   return (
-    <div className={className} onBlur={handleBlur} onFocus={handleFocus}>
+    <div className={className}>
       {options.map(option => {
         const isChecked = option.value === value
 
         return (
           <label
+            onFocus={onFocus}
             key={option.value}
             className={classNames(
               "hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline",
