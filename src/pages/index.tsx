@@ -35,11 +35,22 @@ const IndexPage = () => (
               .required("Please enter your name"),
             age: Yup.number()
               .transform(value => (isNaN(value) ? undefined : value))
-              .min(0, "Only positive ages please")
+              .min(18, "Too young")
+              .max(65, "Too old")
               .required("Please enter your age"),
           })
         )}
         fields={({ values }) => [
+          {
+            name: "firstName",
+            question: "What is your first name?",
+            fieldType: "text",
+          },
+          {
+            name: "age",
+            question: "How old are you?",
+            fieldType: "number",
+          },
           {
             name: "significantOther",
             question: "Do you have a significant other?",
@@ -54,16 +65,6 @@ const IndexPage = () => (
                 },
               ]
             : []),
-          {
-            name: "firstName",
-            question: "What is your first name?",
-            fieldType: "text",
-          },
-          {
-            name: "age",
-            question: "How old are you?",
-            fieldType: "number",
-          },
         ]}
       />
     </div>
