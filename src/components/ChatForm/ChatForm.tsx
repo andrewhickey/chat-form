@@ -1,7 +1,35 @@
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { FieldDefinition, ChatFormData } from "./types"
-import ChatQuestion from "./ChatBubble"
 import ChatField from "./ChatField"
+import useForm from "./useForm"
+
+const findLastSeenIndex = (
+  fields: FieldDefinition[],
+  seen: { [key: string]: boolean }
+) => {
+  let lastValid = 0
+  for (let index = 0; index < fields.length; index++) {
+    const field = fields[index]
+    if (seen[field.name]) {
+      lastValid = index
+    } else {
+      return lastValid
+    }
+  }
+  return lastValid
+}
+
+const hasErrors = (
+  fields: FieldDefinition[],
+  errors: { [key: string]: string }
+) => {
+  return fields.reduce((hasError, field) => {
+    if (errors[field.name]) {
+      return true
+    }
+    return hasError
+  }, false)
+}
 
 type ChatFormProps = {
   /** smallest possible delay in ms before the form replies */
@@ -22,85 +50,49 @@ function ChatForm({
   maxDelay = 300,
   initialValues,
   validate,
-  fields,
+  fields: getFields,
 }: ChatFormProps) {
-  const [values, setValues] = useState(initialValues)
-  const [focused, setFocused] = useState<{
-    [name: string]: boolean
-  }>({})
-  const [touched, setTouched] = useState<{
-    [name: string]: boolean
-  }>({})
-  const [errors, setErrors] = useState<{
-    [name: string]: string
-  }>({})
-
-  useEffect(() => {
-    validate(values).then(errors => setErrors(errors))
-  }, [setErrors, validate, values])
-
-  const computedFields = useMemo(() => fields({ values }), [fields, values])
-
-  const [currentField, setCurrentField] = useState(computedFields[0]?.name)
-
-  const visibleIndex = Math.max(
-    computedFields.findIndex(field => field.name === currentField),
-    0
-  )
-
-  const visibleFields = useMemo(
-    () => computedFields.slice(0, visibleIndex + 1),
-    [computedFields, visibleIndex]
-  )
-
-  const hasVisibleErrors = useMemo(
-    () =>
-      visibleFields.reduce((errorFound, field) => {
-        if (errors[field.name]) {
-          return true
-        }
-        return errorFound
-      }, false),
-    [errors, visibleFields]
-  )
-
-  /**
-   * Moves the current field forward if the form so far is valid
-   */
-  useEffect(() => {
-    console.log({
-      touched: touched[currentField],
-      hasVisibleErrors,
-      focused: focused[currentField],
-    })
-    if (touched[currentField] && !hasVisibleErrors && !focused[currentField]) {
-      const nextField = computedFields[visibleIndex + 1]
-      if (nextField) {
-        setCurrentField(nextField.name)
-      }
-    }
-  }, [
-    currentField,
-    setCurrentField,
-    touched,
+  const {
+    values,
     focused,
-    hasVisibleErrors,
-    visibleIndex,
-    computedFields,
-  ])
+    touched,
+    errors,
+    onChangeField,
+    onFocusField,
+    onBlurField,
+  } = useForm({ initialValues, validate })
 
-  const onChangeField = (name: string) => async (value: any) => {
-    setTouched({ ...values, [name]: true })
-    setValues({ ...values, [name]: value })
-  }
+  const fields = useMemo(() => getFields({ values }), [getFields, values])
 
-  const onFocusField = (name: string) => () => {
-    setFocused({ ...values, [name]: true })
-  }
+  const [seen, setSeen] = useState<{
+    [name: string]: boolean
+  }>({})
 
-  const onBlurField = (name: string) => async () => {
-    setFocused({ ...values, [name]: false })
-  }
+  const onRenderField = useCallback(
+    (name: string) => () => {
+      setSeen({ ...seen, [name]: true })
+    },
+    [seen]
+  )
+
+  const visibleFields = useMemo(() => {
+    // by default show all fields that have been seen before
+    const visibleIndex = findLastSeenIndex(fields, seen)
+
+    // if all visible fields are valid
+    // and the last field isn't focused
+    // show one extra
+    const isValid = !hasErrors(fields.slice(0, visibleIndex + 1), errors)
+    console.log("FIELDS", fields)
+    console.log("INDEX", visibleIndex)
+    const isFocused = focused[fields[visibleIndex].name]
+    console.log("ERRORS", errors)
+    console.log("DATA", { isValid, isFocused })
+    if (isValid && !isFocused) {
+      return fields.slice(0, visibleIndex + 2)
+    }
+    return fields.slice(0, visibleIndex + 1)
+  }, [fields, seen, errors, focused])
 
   return (
     <div className="flex flex-col space-y-6">
@@ -111,6 +103,7 @@ function ChatForm({
           value={values[field.name]}
           error={errors[field.name]}
           touched={touched[field.name]}
+          onRenderField={onRenderField(field.name)}
           onChange={onChangeField(field.name)}
           onBlur={onBlurField(field.name)}
           onFocus={onFocusField(field.name)}

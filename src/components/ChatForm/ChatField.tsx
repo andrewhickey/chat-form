@@ -1,4 +1,4 @@
-import * as React from "react"
+import React, { useEffect } from "react"
 import ChatBubble from "./ChatBubble"
 import { FieldDefinition } from "./types"
 import BasicInput from "../BasicInput"
@@ -13,6 +13,7 @@ type ChatFieldProps = {
   onChange: (value: any) => void
   onFocus: () => void
   onBlur: () => void
+  onRenderField: () => void
 }
 
 function ChatField({
@@ -20,10 +21,15 @@ function ChatField({
   value,
   touched,
   error,
+  onRenderField,
   onChange,
   onFocus,
   onBlur,
 }: ChatFieldProps) {
+  useEffect(() => {
+    onRenderField()
+  }, [])
+
   const inputProps = {
     value: value,
     onChange,

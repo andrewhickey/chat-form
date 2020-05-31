@@ -21,7 +21,7 @@ const IndexPage = () => (
         }}
         validate={validateSchema(
           Yup.object({
-            significantOther: Yup.boolean(),
+            significantOther: Yup.boolean().required(),
             significantOtherName: Yup.string()
               .min(2, "Too short")
               .max(25, "Too long")

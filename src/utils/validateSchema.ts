@@ -2,11 +2,11 @@ import * as Yup from "yup"
 import { InferType } from "yup"
 import { set, get } from "lodash"
 
-const validateSchema = (schema: Yup.ObjectSchema) => async (
+const validateSchema = (schema: Yup.ObjectSchema) => (
   values: InferType<typeof schema>
 ) => {
   try {
-    await schema.validate(values)
+    schema.validateSync(values, { abortEarly: false })
     return {}
   } catch (error) {
     if (error instanceof Yup.ValidationError) {
