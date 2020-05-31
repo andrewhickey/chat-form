@@ -13,7 +13,6 @@ type ChatFieldProps = {
   onChange: (value: any) => void
   onFocus: () => void
   onBlur: () => void
-  onRenderField: () => void
   minDelay: number
   maxDelay: number
 }
@@ -23,7 +22,6 @@ function ChatField({
   value,
   touched,
   error,
-  onRenderField,
   onChange,
   onFocus,
   onBlur,
@@ -36,12 +34,11 @@ function ChatField({
     const delay = Math.random() * maxDelay - minDelay + minDelay
     setTimeout(() => {
       setIsLoading(false)
-      onRenderField()
     }, delay)
   }, [])
 
   const inputProps = {
-    value: value,
+    value,
     onChange,
     onFocus,
     onBlur,
@@ -68,6 +65,7 @@ function ChatField({
         {field.fieldType === "number" && (
           <BasicInput
             {...inputProps}
+            value={value || ""}
             className={classNames({
               "border-red-600": touched && error,
             })}

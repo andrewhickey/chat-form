@@ -1,22 +1,15 @@
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState, useEffect } from "react"
 import ChatField from "./ChatField"
 import { FieldDefinition } from "./types"
-import useForm from "./useForm"
+import { useForm } from "../../utils"
 
-const findLastSeenIndex = (
-  fields: FieldDefinition[],
-  seen: { [key: string]: boolean }
-) => {
-  let lastValid = 0
-  for (let index = 0; index < fields.length; index++) {
-    const field = fields[index]
-    if (seen[field.name]) {
-      lastValid = index
-    } else {
-      return lastValid
+const findLast = (array: string[], predicate: (value: string) => boolean) => {
+  for (let index = array.length - 1; index >= 0; index--) {
+    const value = array[index]
+    if (predicate(value)) {
+      return value
     }
   }
-  return lastValid
 }
 
 const hasErrors = (
@@ -68,35 +61,36 @@ function ChatForm({
 
   const fields = useMemo(() => getFields({ values }), [getFields, values])
   const isValid = useMemo(() => !hasErrors(fields, errors), [fields, errors])
+  const [history, setHistory] = useState<string[]>([])
 
-  const [seen, setSeen] = useState<{
-    [name: string]: boolean
-  }>({})
+  console.log("FIELDS", fields)
+  const currentField =
+    findLast(history, fieldName => {
+      return !!fields.find(field => field.name === fieldName)
+    }) || fields[0].name
 
-  const onRenderField = useCallback(
-    (name: string) => () => {
-      setSeen({ ...seen, [name]: true })
-    },
-    [seen]
-  )
+  const currentIndex = fields.findIndex(field => field.name === currentField)
 
-  const visibleFields = useMemo(() => {
-    // by default show all fields that have been seen before
-    const visibleIndex = findLastSeenIndex(fields, seen)
+  const visibleFields = fields.slice(0, currentIndex + 1)
 
-    // if all visible fields are valid
-    // and the last field isn't focused
-    // show one extra
-    const isValid = !hasErrors(fields.slice(0, visibleIndex + 1), errors)
-    const isFocused = focused[fields[visibleIndex].name]
+  // if the last field is unfocused
+  // and the visible form is valid
+  // move the form on one item
+  useEffect(() => {
+    console.log(currentField)
+    if (currentField) {
+      const isFocused = focused[currentField]
+      const isValid = !hasErrors(visibleFields, errors)
 
-    if (isValid && !isFocused) {
-      return fields.slice(0, visibleIndex + 2)
+      if (!isFocused && isValid) {
+        const nextField = fields[currentIndex + 1]
+        if (nextField) {
+          setHistory([...history, nextField.name])
+        }
+      }
     }
-    return fields.slice(0, visibleIndex + 1)
-  }, [fields, seen, errors, focused])
+  }, [errors, visibleFields, focused, currentField, currentIndex, history])
 
-  console.log("IS VALID", isValid)
   return (
     <div className="flex flex-col space-y-6">
       {visibleFields.map(field => (
@@ -106,7 +100,6 @@ function ChatForm({
           value={values[field.name]}
           error={errors[field.name]}
           touched={touched[field.name]}
-          onRenderField={onRenderField(field.name)}
           onChange={onChangeField(field.name)}
           onBlur={onBlurField(field.name)}
           onFocus={onFocusField(field.name)}
