@@ -63,7 +63,6 @@ function ChatForm({
   const isValid = useMemo(() => !hasErrors(fields, errors), [fields, errors])
   const [history, setHistory] = useState<string[]>([])
 
-  console.log("FIELDS", fields)
   const currentField =
     findLast(history, fieldName => {
       return !!fields.find(field => field.name === fieldName)
