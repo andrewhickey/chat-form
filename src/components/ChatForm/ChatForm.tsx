@@ -1,7 +1,9 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react"
+import React, { useEffect, useMemo, useState, useCallback } from "react"
+import { useForm } from "../../utils"
+import Button from "../Button"
+import ChatBubble from "./ChatBubble"
 import ChatField from "./ChatField"
 import { FieldDefinition } from "./types"
-import { useForm } from "../../utils"
 
 const findLast = (array: string[], predicate: (value: string) => boolean) => {
   for (let index = array.length - 1; index >= 0; index--) {
@@ -25,19 +27,14 @@ const hasErrors = (
 }
 
 type ChatFormProps = {
-  /** smallest possible delay in ms before the form replies */
   minDelay?: number
-  /** longest possible delay in ms before the form replies */
   maxDelay?: number
-  /** */
   initialValues: any
-  /** */
   fields: ({
     values,
   }: {
     values: { [name: string]: string }
   }) => FieldDefinition[]
-  /** */
   onSubmit: ({ values }: { values: { [name: string]: string } }) => void
   validate: (values: { [name: string]: string }) => { [name: string]: string }
 }
@@ -47,6 +44,7 @@ function ChatForm({
   maxDelay = 900,
   initialValues,
   validate,
+  onSubmit,
   fields: getFields,
 }: ChatFormProps) {
   const {
@@ -54,14 +52,16 @@ function ChatForm({
     focused,
     touched,
     errors,
-    onChangeField,
-    onFocusField,
-    onBlurField,
-  } = useForm({ initialValues, validate })
+    handleChangeField,
+    handleFocusField,
+    handleBlurField,
+    handleSubmit,
+  } = useForm({ initialValues, validate, onSubmit })
 
   const fields = useMemo(() => getFields({ values }), [getFields, values])
   const isValid = useMemo(() => !hasErrors(fields, errors), [fields, errors])
   const [history, setHistory] = useState<string[]>([])
+  const [isDone, setIsDone] = useState<boolean>(false)
 
   const currentField =
     findLast(history, fieldName => {
@@ -76,7 +76,6 @@ function ChatForm({
   // and the visible form is valid
   // move the form on one item
   useEffect(() => {
-    console.log(currentField)
     if (currentField) {
       const isFocused = focused[currentField]
       const isValid = !hasErrors(visibleFields, errors)
@@ -90,6 +89,11 @@ function ChatForm({
     }
   }, [errors, visibleFields, focused, currentField, currentIndex, history])
 
+  const handleDone = useCallback(() => {
+    handleSubmit()
+    setIsDone(true)
+  }, [handleSubmit, setIsDone])
+
   return (
     <div className="flex flex-col space-y-6">
       {visibleFields.map(field => (
@@ -99,13 +103,27 @@ function ChatForm({
           value={values[field.name]}
           error={errors[field.name]}
           touched={touched[field.name]}
-          onChange={onChangeField(field.name)}
-          onBlur={onBlurField(field.name)}
-          onFocus={onFocusField(field.name)}
+          onChange={handleChangeField(field.name)}
+          onBlur={handleBlurField(field.name)}
+          onFocus={handleFocusField(field.name)}
           minDelay={minDelay}
           maxDelay={maxDelay}
+          disabled={isDone}
         />
       ))}
+
+      {isValid && (
+        <ChatBubble className="self-end">
+          <Button onClick={handleDone} disabled={isDone}>
+            Done
+          </Button>
+        </ChatBubble>
+      )}
+      {isDone && (
+        <ChatBubble className="self-end">
+          That's everything we need. Thanks!
+        </ChatBubble>
+      )}
     </div>
   )
 }

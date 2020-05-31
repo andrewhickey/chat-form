@@ -13,6 +13,7 @@ type ChatFieldProps = {
   onChange: (value: any) => void
   onFocus: () => void
   onBlur: () => void
+  disabled: boolean
   minDelay: number
   maxDelay: number
 }
@@ -25,6 +26,7 @@ function ChatField({
   onChange,
   onFocus,
   onBlur,
+  disabled,
   minDelay,
   maxDelay,
 }: ChatFieldProps) {
@@ -42,6 +44,7 @@ function ChatField({
     onChange,
     onFocus,
     onBlur,
+    disabled,
   }
 
   if (isLoading) {

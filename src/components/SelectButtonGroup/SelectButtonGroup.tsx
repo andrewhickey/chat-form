@@ -10,6 +10,7 @@ type SelectButtonGroupProps = {
   onChange: (value: any) => void
   onFocus: () => void
   onBlur: () => void
+  disabled: boolean
 }
 function SelectButtonGroup({
   options,
@@ -19,15 +20,8 @@ function SelectButtonGroup({
   onChange,
   onBlur,
   onFocus,
+  disabled,
 }: SelectButtonGroupProps & React.InputHTMLAttributes<HTMLInputElement>) {
-  const handleFocus = () => {
-    onFocus()
-  }
-
-  const handleBlur = () => {
-    onBlur()
-  }
-
   const handleChange = (value: any) => (
     e: React.FormEvent<HTMLInputElement>
   ) => {
@@ -40,7 +34,7 @@ function SelectButtonGroup({
   }
 
   return (
-    <div className={className}>
+    <div className={classNames("space-x-2", className)}>
       {options.map(option => {
         const isChecked = option.value === value
 
@@ -48,10 +42,13 @@ function SelectButtonGroup({
           <label
             key={option.value}
             className={classNames(
-              "hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline",
+              "text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline",
               {
-                "bg-blue-500": !isChecked,
-                "bg-blue-600": isChecked,
+                "hover:bg-blue-700": !disabled,
+                "bg-blue-500": !isChecked && !disabled,
+                "bg-blue-600": isChecked && !disabled,
+                "bg-gray-500": !isChecked && disabled,
+                "bg-gray-600": isChecked && disabled,
               }
             )}
           >
@@ -62,6 +59,7 @@ function SelectButtonGroup({
               value={option.value}
               checked={isChecked}
               onChange={handleChange(option.value)}
+              disabled={disabled}
             />
             {option.label}
           </label>

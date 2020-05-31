@@ -1,6 +1,11 @@
 import { useMemo, useState, useCallback } from "react"
 
-const useForm = ({ validate, initialValues }) => {
+type UseFormInput = {
+  onSubmit: ({ values }: { values: { [name: string]: string } }) => void
+  validate: (values: { [name: string]: string }) => { [name: string]: string }
+  initialValues: any
+}
+const useForm = ({ validate, initialValues, onSubmit }: UseFormInput) => {
   const [values, setValues] = useState(initialValues)
   const [focused, setFocused] = useState<{
     [name: string]: boolean
@@ -11,36 +16,41 @@ const useForm = ({ validate, initialValues }) => {
 
   const errors = useMemo(() => validate(values), [validate, values])
 
-  const onChangeField = useCallback(
-    (name: string) => async (value: any) => {
+  const handleChangeField = useCallback(
+    (name: string) => (value: any) => {
       setTouched({ ...touched, [name]: true })
       setValues({ ...values, [name]: value })
     },
     [touched, values]
   )
 
-  const onFocusField = useCallback(
+  const handleFocusField = useCallback(
     (name: string) => () => {
       setFocused({ ...focused, [name]: true })
     },
     [focused]
   )
 
-  const onBlurField = useCallback(
-    (name: string) => async () => {
+  const handleBlurField = useCallback(
+    (name: string) => () => {
       setFocused({ ...focused, [name]: false })
     },
     [focused]
   )
+
+  const handleSubmit = useCallback(() => {
+    onSubmit(values)
+  }, [focused])
 
   return {
     values,
     focused,
     touched,
     errors,
-    onChangeField,
-    onFocusField,
-    onBlurField,
+    handleChangeField,
+    handleFocusField,
+    handleBlurField,
+    handleSubmit,
   }
 }
 
