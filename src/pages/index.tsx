@@ -15,8 +15,8 @@ const IndexPage = () => (
         }}
         initialValues={{
           firstName: "",
-          age: null,
-          significantOther: null,
+          age: undefined,
+          significantOther: undefined,
           significantOtherName: "",
         }}
         validate={validateSchema(

@@ -50,8 +50,8 @@ type ChatFormProps = {
 }
 
 function ChatForm({
-  minDelay = 100,
-  maxDelay = 300,
+  minDelay = 400,
+  maxDelay = 900,
   initialValues,
   validate,
   fields: getFields,
@@ -110,6 +110,8 @@ function ChatForm({
           onChange={onChangeField(field.name)}
           onBlur={onBlurField(field.name)}
           onFocus={onFocusField(field.name)}
+          minDelay={minDelay}
+          maxDelay={maxDelay}
         />
       ))}
     </div>

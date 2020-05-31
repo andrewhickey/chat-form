@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import ChatBubble from "./ChatBubble"
 import { FieldDefinition } from "./types"
 import BasicInput from "../BasicInput"
@@ -14,6 +14,8 @@ type ChatFieldProps = {
   onFocus: () => void
   onBlur: () => void
   onRenderField: () => void
+  minDelay: number
+  maxDelay: number
 }
 
 function ChatField({
@@ -25,9 +27,17 @@ function ChatField({
   onChange,
   onFocus,
   onBlur,
+  minDelay,
+  maxDelay,
 }: ChatFieldProps) {
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
-    onRenderField()
+    const delay = Math.random() * maxDelay - minDelay + minDelay
+    setTimeout(() => {
+      setIsLoading(false)
+      onRenderField()
+    }, delay)
   }, [])
 
   const inputProps = {
@@ -35,6 +45,10 @@ function ChatField({
     onChange,
     onFocus,
     onBlur,
+  }
+
+  if (isLoading) {
+    return <ChatBubble className="self-start">...</ChatBubble>
   }
 
   return (
