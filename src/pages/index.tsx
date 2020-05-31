@@ -15,17 +15,20 @@ const IndexPage = () => (
         }}
         initialValues={{
           firstName: "",
-          age: 0,
+          age: null,
           significantOther: null,
           significantOtherName: "",
         }}
         validate={validateSchema(
           Yup.object({
             significantOther: Yup.boolean().required(),
-            significantOtherName: Yup.string()
-              .min(2, "Too short")
-              .max(25, "Too long")
-              .required("Please enter  significant other's name"),
+            significantOtherName: Yup.string().when("significantOther", {
+              is: true,
+              then: Yup.string()
+                .min(2, "Too short")
+                .max(25, "Too long")
+                .required("Please enter  significant other's name"),
+            }),
             firstName: Yup.string()
               .min(2, "Too short")
               .max(25, "Too long")
