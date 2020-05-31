@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react"
-import { FieldDefinition, ChatFormData } from "./types"
+import React, { useCallback, useMemo, useState } from "react"
 import ChatField from "./ChatField"
+import { FieldDefinition } from "./types"
 import useForm from "./useForm"
 
 const findLastSeenIndex = (
@@ -39,10 +39,14 @@ type ChatFormProps = {
   /** */
   initialValues: any
   /** */
-  fields: ({ values: any }) => FieldDefinition[]
+  fields: ({
+    values,
+  }: {
+    values: { [name: string]: string }
+  }) => FieldDefinition[]
   /** */
-  onSubmit: ({ values: any }) => void
-  validate: (values: any) => Promise<any>
+  onSubmit: ({ values }: { values: { [name: string]: string } }) => void
+  validate: (values: { [name: string]: string }) => { [name: string]: string }
 }
 
 function ChatForm({
@@ -63,6 +67,7 @@ function ChatForm({
   } = useForm({ initialValues, validate })
 
   const fields = useMemo(() => getFields({ values }), [getFields, values])
+  const isValid = useMemo(() => !hasErrors(fields, errors), [fields, errors])
 
   const [seen, setSeen] = useState<{
     [name: string]: boolean
@@ -83,17 +88,15 @@ function ChatForm({
     // and the last field isn't focused
     // show one extra
     const isValid = !hasErrors(fields.slice(0, visibleIndex + 1), errors)
-    console.log("FIELDS", fields)
-    console.log("INDEX", visibleIndex)
     const isFocused = focused[fields[visibleIndex].name]
-    console.log("ERRORS", errors)
-    console.log("DATA", { isValid, isFocused })
+
     if (isValid && !isFocused) {
       return fields.slice(0, visibleIndex + 2)
     }
     return fields.slice(0, visibleIndex + 1)
   }, [fields, seen, errors, focused])
 
+  console.log("IS VALID", isValid)
   return (
     <div className="flex flex-col space-y-6">
       {visibleFields.map(field => (
