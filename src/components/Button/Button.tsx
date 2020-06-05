@@ -1,10 +1,7 @@
 import React from "react"
 import classNames from "classnames"
 
-function Button({
-  className,
-  ...buttonProps
-}: React.InputHTMLAttributes<HTMLButtonElement>) {
+function Button({ className, ...buttonProps }: React.ComponentProps<"button">) {
   return (
     <button
       {...buttonProps}
